@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Anime or Real Prediction</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            margin-bottom: 20px;
+            font-size: 32px;
+            font-weight: normal;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #777;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #46a049;
+        }
+
+        #prediction-result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 40px;
+            padding: 20px 0;
+            font-size: 14px;
+            color: #999;
+            border-top: 1px solid #ddd;
+        }
+
+        footer a {
+            color: #666;
+            
+        }
+
+        footer img {
+            height: 24px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Anime or Real Prediction</h1>
+
+        <form id="image-form">
+            <label for="image-input">Select an image:</label>
+            <input type="file" id="image-input" name="image">
+            <button type="submit">Submit</button>
+        </form>
+
+        <div id="prediction-result"></div>
+    </div>
+
+    <footer>
+        <div>Made by Pudding</div>
+        <a href="https://github.com/Sart-Hack" target="_blank"><img
+                src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub logo"></a>
+    </footer>
+
+    <script>
+        // Handle form submission
+        const form = document.getElementById('image-form');
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+
+            // Get the selected image and convert it to base64
+            const imageInput = document.getElementById('image-input');
+            const file = imageInput.files[0];
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                const base64Image = reader.result;
+
+                // Send the image to the API for prediction
+                fetch("https://pudding-anime-or-real.hf.space/run/predict", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        data: [base64Image]
+                    })
+                })
+                    .then(r => r.json())
+                    .then(
+                        r => {
+                            let data = r.data[0];
+
+                            // Extract the label and probability from the prediction result
+                            const label = data.label;
+                            const confidences = data.confidences;
+                            let probability = 'N/A';
+                            if (confidences && confidences.length > 0) {
+                                const confidence = confidences[0];
+                                probability = `${confidence.confidence.toFixed(2)}%`;
+                            }
+
+                            // Display the label and probability
+                            const resultElement = document.getElementById('prediction-result');
+                            resultElement.innerHTML = `Prediction: ${label} (${probability})`;
+                        }
+                    )
+            };
+        });
+    </script>
+</body>
+
+</html>
