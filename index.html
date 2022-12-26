@@ -145,7 +145,9 @@
                             let probability = 'N/A';
                             if (confidences && confidences.length > 0) {
                                 const confidence = confidences[0];
-                                probability = `${confidence.confidence.toFixed(2)}%`;
+                                console.log(confidence.confidence);
+                                probability = `${confidence.confidence.toFixed(2)*100}%`;
+                                console.log(probability);
                             }
 
                             // Display the label and probability
